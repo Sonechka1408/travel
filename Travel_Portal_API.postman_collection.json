@@ -1,0 +1,70 @@
+{
+    "info": {
+        "name": "Travel Portal API",
+        "description": "Collection for testing Travel Portal's Telegram Bot integration",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Send Message to Telegram",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "https://api.telegram.org/bot{{BOT_TOKEN}}/sendMessage",
+                    "protocol": "https",
+                    "host": ["api", "telegram", "org"],
+                    "path": ["bot{{BOT_TOKEN}}", "sendMessage"]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"chat_id\": \"{{CHAT_ID}}\",\n    \"text\": \"Test message from Travel Portal\",\n    \"parse_mode\": \"HTML\"\n}"
+                },
+                "description": "Send a test message to Telegram bot"
+            }
+        },
+        {
+            "name": "Get Bot Info",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "https://api.telegram.org/bot{{BOT_TOKEN}}/getMe",
+                    "protocol": "https",
+                    "host": ["api", "telegram", "org"],
+                    "path": ["bot{{BOT_TOKEN}}", "getMe"]
+                },
+                "description": "Get information about the bot"
+            }
+        },
+        {
+            "name": "Get Updates",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "https://api.telegram.org/bot{{BOT_TOKEN}}/getUpdates",
+                    "protocol": "https",
+                    "host": ["api", "telegram", "org"],
+                    "path": ["bot{{BOT_TOKEN}}", "getUpdates"]
+                },
+                "description": "Get latest updates (messages) sent to the bot"
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "BOT_TOKEN",
+            "value": "YOUR_BOT_TOKEN"
+        },
+        {
+            "key": "CHAT_ID",
+            "value": "YOUR_CHAT_ID"
+        }
+    ]
+} 

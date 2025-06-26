@@ -1,0 +1,245 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}{{ destination.name }} - Travel Portal{% endblock %}
+
+{% block content %}
+<div class="destination-detail">
+    <div class="destination-header">
+        {% if destination.image %}
+            <img src="{{ destination.image.url }}" alt="{{ destination.name }}" class="destination-hero-image">
+        {% endif %}
+        <h1>{{ destination.name }}</h1>
+    </div>
+
+    <div class="destination-content">
+        <div class="description">
+            {{ destination.description|linebreaks }}
+        </div>
+
+        <div class="destination-meta">
+            <p class="date-added">Added on: {{ destination.created_at|date:"F j, Y" }}</p>
+            
+            <div class="destination-actions">
+                <div class="like-section" data-destination-id="{{ destination.id }}">
+                    <button class="like-btn {% if user_like and user_like.is_like %}active{% endif %}" data-action="like">
+                        <i class="fas fa-thumbs-up"></i>
+                        <span class="likes-count">{{ destination.get_likes_count }}</span>
+                    </button>
+                    <button class="dislike-btn {% if user_like and not user_like.is_like %}active{% endif %}" data-action="dislike">
+                        <i class="fas fa-thumbs-down"></i>
+                        <span class="dislikes-count">{{ destination.get_dislikes_count }}</span>
+                    </button>
+                </div>
+                <a href="{% url 'contact' %}" class="btn btn-primary">Inquire About This Destination</a>
+                <a href="{% url 'destinations' %}" class="btn btn-secondary">Back to All Destinations</a>
+            </div>
+        </div>
+
+        <div class="comments-section">
+            <h3>Comments</h3>
+            {% if user.is_authenticated %}
+                <form id="comment-form" class="comment-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea name="text" id="comment-text" rows="3" class="form-control" placeholder="Write your comment..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+            {% else %}
+                <p class="login-prompt">Please <a href="{% url 'login' %}">login</a> to leave a comment.</p>
+            {% endif %}
+
+            <div id="comments-list" class="comments-list">
+                {% for comment in destination.comments.all %}
+                    <div class="comment" data-comment-id="{{ comment.id }}">
+                        <div class="comment-header">
+                            <span class="comment-author">{{ comment.user.username }}</span>
+                            <span class="comment-date">{{ comment.created_at|date:"F j, Y H:i" }}</span>
+                            {% if user.is_staff %}
+                                <button class="delete-comment-btn" title="Delete comment">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                        <div class="comment-content">{{ comment.text }}</div>
+                        <div class="comment-actions">
+                            <button class="like-btn {% if comment.user_like and comment.user_like.is_like %}active{% endif %}" data-action="like">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span class="likes-count">{{ comment.like_set.filter.is_like.count }}</span>
+                            </button>
+                            <button class="dislike-btn {% if comment.user_like and not comment.user_like.is_like %}active{% endif %}" data-action="dislike">
+                                <i class="fas fa-thumbs-down"></i>
+                                <span class="dislikes-count">{{ comment.like_set.filter.is_like.count }}</span>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Prevent multiple initializations
+if (window.hasInitialized) {
+    console.log('Already initialized');
+} else {
+    window.hasInitialized = true;
+
+    const commentForm = document.getElementById('comment-form');
+    const commentsList = document.getElementById('comments-list');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const destinationId = "{{ destination.id }}";
+    let isSubmitting = false;
+
+    if (commentForm) {
+        commentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (isSubmitting) return;
+            
+            const text = document.getElementById('comment-text').value.trim();
+            if (!text) return;
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            isSubmitting = true;
+
+            try {
+                const response = await fetch('/api/comments/create/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        destination_id: destinationId,
+                        text: text
+                    })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    document.getElementById('comment-text').value = '';
+                    const commentElement = document.createElement('div');
+                    commentElement.className = 'comment';
+                    commentElement.dataset.commentId = data.comment.id;
+                    commentElement.innerHTML = `
+                        <div class="comment-header">
+                            <span class="comment-author">${data.comment.user}</span>
+                            <span class="comment-date">${data.comment.created_at}</span>
+                            {% if user.is_staff %}
+                                <button class="delete-comment-btn" title="Delete comment">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                        <div class="comment-content">${data.comment.text}</div>
+                        <div class="comment-actions">
+                            <button class="like-btn" data-action="like">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span class="likes-count">0</span>
+                            </button>
+                            <button class="dislike-btn" data-action="dislike">
+                                <i class="fas fa-thumbs-down"></i>
+                                <span class="dislikes-count">0</span>
+                            </button>
+                        </div>
+                    `;
+                    commentsList.insertBefore(commentElement, commentsList.firstChild);
+                }
+            } catch (error) {
+                console.error('Error posting comment:', error);
+            } finally {
+                submitButton.disabled = false;
+                isSubmitting = false;
+            }
+        });
+    }
+
+    // Handle comment deletion
+    document.addEventListener('click', async function(e) {
+        const deleteBtn = e.target.closest('.delete-comment-btn');
+        if (deleteBtn) {
+            const comment = deleteBtn.closest('.comment');
+            const commentId = comment.dataset.commentId;
+            
+            if (confirm('Are you sure you want to delete this comment?')) {
+                try {
+                    const response = await fetch('/api/comments/delete/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({
+                            comment_id: commentId
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        comment.remove();
+                    } else {
+                        alert('Failed to delete comment: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error deleting comment:', error);
+                    alert('Failed to delete comment. Please try again.');
+                }
+            }
+        }
+    });
+
+    // Handle likes/dislikes with event delegation
+    document.addEventListener('click', async function(e) {
+        const button = e.target.closest('.like-btn, .dislike-btn');
+        if (!button || button.disabled) return;
+
+        const action = button.dataset.action;
+        const commentContainer = button.closest('.comment');
+        const commentId = commentContainer?.dataset.commentId;
+        
+        // Disable both buttons in the container
+        const buttons = (commentContainer || button.closest('.like-section')).querySelectorAll('.like-btn, .dislike-btn');
+        buttons.forEach(btn => btn.disabled = true);
+
+        try {
+            const response = await fetch('/api/like/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    destination_id: commentId ? null : destinationId,
+                    comment_id: commentId,
+                    action: action
+                })
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                const container = commentId ? commentContainer : document.querySelector('.like-section');
+                const likesCount = container.querySelector('.likes-count');
+                const dislikesCount = container.querySelector('.dislikes-count');
+                const likeBtn = container.querySelector('.like-btn');
+                const dislikeBtn = container.querySelector('.dislike-btn');
+
+                if (likesCount) likesCount.textContent = data.likes;
+                if (dislikesCount) dislikesCount.textContent = data.dislikes;
+
+                likeBtn.classList.toggle('active', data.user_action === 'like');
+                dislikeBtn.classList.toggle('active', data.user_action === 'dislike');
+            }
+        } catch (error) {
+            console.error('Error processing like/dislike:', error);
+        } finally {
+            buttons.forEach(btn => btn.disabled = false);
+        }
+    });
+}
+</script>
+{% endblock %} 

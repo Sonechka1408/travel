@@ -1,0 +1,29 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Destinations - Travel Portal{% endblock %}
+
+{% block content %}
+<div class="destinations-page">
+    <h1>Our Destinations</h1>
+    <p class="destinations-intro">Explore our handpicked collection of amazing destinations from around the world.</p>
+
+    <div class="destination-grid">
+        {% if destinations %}
+            {% for destination in destinations %}
+            <div class="destination-card">
+                {% if destination.image %}
+                    <img src="{{ destination.image.url }}" alt="{{ destination.name }}">
+                {% endif %}
+                <div class="destination-content">
+                    <h2>{{ destination.name }}</h2>
+                    <p>{{ destination.description|truncatewords:50 }}</p>
+                    <a href="{% url 'destination_detail' destination.pk %}" class="btn">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-destinations">No destinations available at the moment. Please check back later.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

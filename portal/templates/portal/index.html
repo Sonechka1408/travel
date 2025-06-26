@@ -1,0 +1,39 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Welcome - Travel Portal{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to Travel Portal</h1>
+    <p>Discover amazing destinations around the world</p>
+</div>
+
+<section class="featured-destinations">
+    <h2>Featured Destinations</h2>
+    <div class="destination-grid">
+        {% if destinations %}
+            {% for destination in destinations %}
+            <div class="destination-card">
+                {% if destination.image %}
+                    <img src="{{ destination.image.url }}" alt="{{ destination.name }}">
+                {% endif %}
+                <h3>{{ destination.name }}</h3>
+                <p>{{ destination.description|truncatewords:30 }}</p>
+                <a href="{% url 'destination_detail' destination.pk %}" class="btn">Learn More</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No destinations available.</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="cta-section">
+    <h2>Start Your Journey Today</h2>
+    <p>Join our community of travelers and explore the world</p>
+    <div class="cta-buttons">
+        <a href="{% url 'register' %}" class="btn btn-primary">Register Now</a>
+        <a href="{% url 'contact' %}" class="btn btn-secondary">Contact Us</a>
+    </div>
+</section>
+{% endblock %} 

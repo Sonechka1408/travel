@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - auth-service
+      - destination-service
+      - comment-service
+      - like-service
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+
+  auth-service:
+    build: ./auth-service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./auth-service:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    environment:
+      - DB_HOST=db
+      - DB_NAME=travel_portal
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      - db
+
+  destination-service:
+    build: ./destination-service
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - ./destination-service:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    environment:
+      - DB_HOST=db
+      - DB_NAME=travel_portal
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      - db
+
+  comment-service:
+    build: ./comment-service
+    command: python manage.py runserver 0.0.0.0:8002
+    volumes:
+      - ./comment-service:/app
+    environment:
+      - DB_HOST=db
+      - DB_NAME=travel_portal
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      - db
+
+  like-service:
+    build: ./like-service
+    command: python manage.py runserver 0.0.0.0:8003
+    volumes:
+      - ./like-service:/app
+    environment:
+      - DB_HOST=db
+      - DB_NAME=travel_portal
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=travel_portal
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume: 

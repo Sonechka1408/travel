@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Travel Portal{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <!-- Fixed Navigation Menu -->
+    <nav class="fixed-nav">
+        <div class="nav-brand">Travel Portal</div>
+        <div class="nav-toggle">☰</div>
+        <ul class="nav-menu">
+            <li><a href="{% url 'home' %}" {% if request.path == '/' %}class="active"{% endif %}>Home</a></li>
+            <li><a href="{% url 'destinations' %}" {% if 'destinations' in request.path %}class="active"{% endif %}>Destinations</a></li>
+            <li><a href="{% url 'about' %}" {% if request.path == '/about/' %}class="active"{% endif %}>About Us</a></li>
+            <li><a href="{% url 'contact' %}" {% if request.path == '/contact/' %}class="active"{% endif %}>Contact</a></li>
+            {% if user.is_authenticated %}
+                <li class="user-menu">
+                    <span class="username"><i class="fas fa-user"></i> {{ user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn">Logout</button>
+                    </form>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}" {% if request.path == '/login/' %}class="active"{% endif %}>Login</a></li>
+                <li><a href="{% url 'register' %}" {% if request.path == '/register/' %}class="active"{% endif %}>Register</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <main>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; {% now "Y" %} Travel Portal. All rights reserved.</p>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html> 

@@ -1,0 +1,31 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Contact Us - Travel Portal{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Contact Us</h1>
+    <p class="contact-intro">Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.</p>
+    
+    <form method="post" class="contact-form">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+            <ul class="errorlist">
+                {% for error in field.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <span class="error-message"></span>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="submit-btn">Send Message</button>
+    </form>
+</div>
+{% endblock %} 

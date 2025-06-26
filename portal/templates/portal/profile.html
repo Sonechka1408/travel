@@ -1,0 +1,62 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}My Profile - Travel Portal{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    <div class="profile-header">
+        <h1>My Profile</h1>
+        {% if user.profile.avatar %}
+            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name }}" class="profile-avatar">
+        {% endif %}
+        <div class="profile-info">
+            <h2>{{ user.get_full_name }}</h2>
+            <p class="username">@{{ user.username }}</p>
+            <p class="email">{{ user.email }}</p>
+            {% if user.phone %}
+                <p class="phone">{{ user.phone }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <form method="post" enctype="multipart/form-data" class="profile-form">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if field.help_text %}
+                <p class="help-text">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+        </form>
+    </div>
+
+    {% if user.contact_set.exists %}
+    <div class="contact-history">
+        <h3>Contact History</h3>
+        <div class="contact-list">
+            {% for contact in user.contact_set.all %}
+            <div class="contact-item">
+                <h4>{{ contact.subject }}</h4>
+                <p class="contact-date">{{ contact.created_at|date:"F j, Y" }}</p>
+                <p class="contact-message">{{ contact.message|truncatewords:30 }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,37 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}Register - Travel Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h1>Create Account</h1>
+        
+        <form method="post" class="registration-form">
+            {% csrf_token %}
+            
+            {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if field.help_text %}
+                <p class="help-text">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="auth-actions">
+                <button type="submit" class="btn btn-primary">Register</button>
+                <a href="{% url 'login' %}" class="btn btn-secondary">Login Instead</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

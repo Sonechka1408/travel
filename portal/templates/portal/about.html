@@ -1,0 +1,44 @@
+{% extends 'portal/base.html' %}
+
+{% block title %}About Us - Travel Portal{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="about-header">
+        <h1>About Travel Portal</h1>
+        <p class="lead">Your gateway to extraordinary destinations and unforgettable experiences.</p>
+    </div>
+
+    <section class="about-content">
+        <div class="mission">
+            <h2>Our Mission</h2>
+            <p>At Travel Portal, we're dedicated to making travel accessible, exciting, and enriching for everyone. We believe that exploring new places and experiencing different cultures helps create a more connected and understanding world.</p>
+        </div>
+
+        <div class="features">
+            <h2>What We Offer</h2>
+            <ul>
+                <li>Carefully curated destinations</li>
+                <li>Expert travel advice</li>
+                <li>Personalized travel planning</li>
+                <li>24/7 customer support</li>
+                <li>Best price guarantees</li>
+            </ul>
+        </div>
+
+        <div class="team">
+            <h2>Our Team</h2>
+            <p>Our team consists of passionate travelers and industry experts who are committed to providing you with the best travel experiences possible. With years of combined experience in tourism and hospitality, we understand what makes a journey truly special.</p>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Start Your Journey</h2>
+        <p>Ready to explore the world with us?</p>
+        <div class="cta-buttons">
+            <a href="{% url 'register' %}" class="btn btn-primary">Join Now</a>
+            <a href="{% url 'contact' %}" class="btn btn-secondary">Get in Touch</a>
+        </div>
+    </section>
+</div>
+{% endblock %} 
